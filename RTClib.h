@@ -46,6 +46,7 @@ class TimeSpan;
 #define DS3231_ALARM2 0x0B    ///< Alarm 2 register
 #define DS3231_CONTROL 0x0E   ///< Control register
 #define DS3231_STATUSREG 0x0F ///< Status register
+#define DS3231_OFFSET 0x10    ///< Offset register
 #define DS3231_TEMPERATUREREG                                                  \
   0x11 ///< Temperature register (high byte - low byte is at 0x12), 10-bit
        ///< temperature value
@@ -307,6 +308,7 @@ public:
   void clearAlarm(uint8_t alarm_num);
   bool alarmFired(uint8_t alarm_num);
   static float getTemperature(); // in Celcius degree
+  void calibrate(int8_t offset);
 };
 
 /** PCF8523 INT/SQW pin mode settings */

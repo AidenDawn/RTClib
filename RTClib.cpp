@@ -1517,3 +1517,31 @@ bool RTC_DS3231::alarmFired(uint8_t alarm_num) {
   uint8_t status = read_i2c_register(DS3231_ADDRESS, DS3231_STATUSREG);
   return (status >> (alarm_num - 1)) & 0x1;
 }
+
+/**************************************************************************/
+/*!
+    @brief  Use an offset to calibrate the DS3231.
+    @details This can be used for:
+            - Aging adjustment
+            - Temperature compensation
+            - Accuracy tuning
+    @param offset Offset value from -64 to +63. See the datasheet for exact ppm
+   values. 
+*/
+/**************************************************************************/
+void RTC_DS3231::calibrate(int8_t offset) {
+  uint8_t reg = (uint8_t)offset & 0x7F;
+  write_i2c_register(DS3231_ADDRESS, DS3231_OFFSETREG, reg);
+  //Serial.println( read_i2c_register(DS3231_ADDRESS, DS3231_OFFSETREG), BIN);
+
+  /* According to datasheet, offset takes place during temperature conversion.
+   * To force offset change, we need to set the conversion to run manually by
+   * setting the CONV bit after checking that BSY is not active.
+   * This does not affect the internal temperature update cycle
+   */
+
+  while(~(read_i2c_register(DS3231_ADDRESS, DS3231_STATUSREG) >> 0x02) & 0x1);
+  uint8_t ctrl = read_i2c_register(DS3231_ADDRESS, DS3231_CONTROL);
+  ctrl |= (1 << 0x02);
+  write_i2c_register(DS3231_ADDRESS, DS3231_CONTROL, ctrl);
+}
